@@ -28,6 +28,7 @@ import com.vaadin.flow.router.Route;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.deployment.BeanArchiveIndexBuildItem;
 import io.quarkus.arc.deployment.BeanContainerBuildItem;
+import io.quarkus.arc.deployment.BeanDefiningAnnotationBuildItem;
 import io.quarkus.arc.deployment.ContextRegistrarBuildItem;
 import io.quarkus.arc.processor.ContextRegistrar;
 import io.quarkus.deployment.annotations.BuildProducer;
@@ -50,13 +51,17 @@ public class VaadinProcessor {
     private static final DotName ROUTE_ANNOTATION = DotName.createSimple(Route.class.getName());
 
     @BuildStep
-    public void build(final BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer, final BuildProducer<FeatureBuildItem> featureProducer) {
+    public void build(final BuildProducer<AdditionalBeanBuildItem> additionalBeanProducer,
+            final BuildProducer<BeanDefiningAnnotationBuildItem> additionalBeanDefiningAnnotationRegistry,
+            final BuildProducer<FeatureBuildItem> featureProducer) {
 
         LOGGER.info("Add Feature");
 
         featureProducer.produce(new FeatureBuildItem("vaadin-framework"));
 
         additionalBeanProducer.produce(AdditionalBeanBuildItem.unremovableOf(QuarkusVaadinServlet.class));
+
+        additionalBeanDefiningAnnotationRegistry.produce(new BeanDefiningAnnotationBuildItem(DotName.createSimple("com.vaadin.flow.router.Route")));
     }
 
     @BuildStep
