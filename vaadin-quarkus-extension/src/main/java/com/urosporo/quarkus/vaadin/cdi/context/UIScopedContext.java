@@ -30,6 +30,8 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
 
+import io.quarkus.arc.Arc;
+
 /**
  * UIScopedContext is the context for {@link UIScoped @UIScoped} beans.
  */
@@ -56,6 +58,10 @@ public class UIScopedContext extends AbstractContext {
 
     @Override
     public boolean isActive() {
+
+        if (this.contextualStorageManager == null) {
+            this.contextualStorageManager = BeanProvider.getContextualReference(Arc.container().beanManager(), ContextualStorageManager.class, false);
+        }
 
         return VaadinSession.getCurrent() != null && UI.getCurrent() != null && this.contextualStorageManager != null;
     }

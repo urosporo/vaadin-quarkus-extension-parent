@@ -3,6 +3,8 @@ package com.urosporo.quarkus.vaadin;
 import static io.quarkus.deployment.annotations.ExecutionTime.STATIC_INIT;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -12,6 +14,7 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.logging.Logger;
 
+import com.urosporo.quarkus.vaadin.DeploymentValidator.BeanInfo;
 import com.urosporo.quarkus.vaadin.cdi.QuarkusVaadinServlet;
 import com.urosporo.quarkus.vaadin.cdi.annotation.NormalRouteScoped;
 import com.urosporo.quarkus.vaadin.cdi.annotation.NormalUIScoped;
@@ -19,6 +22,8 @@ import com.urosporo.quarkus.vaadin.cdi.annotation.RouteScoped;
 import com.urosporo.quarkus.vaadin.cdi.annotation.UIScoped;
 import com.urosporo.quarkus.vaadin.cdi.annotation.VaadinServiceScoped;
 import com.urosporo.quarkus.vaadin.cdi.annotation.VaadinSessionScoped;
+import com.urosporo.quarkus.vaadin.cdi.context.NormalRouteContextWrapper;
+import com.urosporo.quarkus.vaadin.cdi.context.NormalUIContextWrapper;
 import com.urosporo.quarkus.vaadin.cdi.context.RouteScopedContext;
 import com.urosporo.quarkus.vaadin.cdi.context.UIScopedContext;
 import com.urosporo.quarkus.vaadin.cdi.context.VaadinServiceScopedContext;
@@ -29,6 +34,7 @@ import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.deployment.BeanArchiveIndexBuildItem;
 import io.quarkus.arc.deployment.BeanContainerBuildItem;
 import io.quarkus.arc.deployment.BeanDefiningAnnotationBuildItem;
+import io.quarkus.arc.deployment.BeanDeploymentValidatorBuildItem;
 import io.quarkus.arc.deployment.ContextRegistrarBuildItem;
 import io.quarkus.arc.processor.ContextRegistrar;
 import io.quarkus.deployment.annotations.BuildProducer;
@@ -86,14 +92,16 @@ public class VaadinProcessor {
 
     @BuildStep
     @SuppressWarnings("unchecked")
-    public void registerUIScopedContext(final BuildProducer<ContextRegistrarBuildItem> contextRegistry) {
+    public void registerUIScopedContext(final BuildProducer<ContextRegistrarBuildItem> contextRegistry,
+            final BuildProducer<BeanDeploymentValidatorBuildItem> buildValidationProducer) {
 
         LOGGER.info("Register UIScopedContext");
 
-        contextRegistry.produce(new ContextRegistrarBuildItem((ContextRegistrar) registrationContext -> registrationContext.configure(UIScoped.class)
-                .normal().contextClass(UIScopedContext.class).done(), UIScoped.class));
+        contextRegistry.produce(new ContextRegistrarBuildItem(
+                (ContextRegistrar) registrationContext -> registrationContext.configure(UIScoped.class).contextClass(UIScopedContext.class).done(),
+                UIScoped.class));
         contextRegistry.produce(new ContextRegistrarBuildItem((ContextRegistrar) registrationContext -> registrationContext
-                .configure(NormalUIScoped.class).normal().contextClass(UIScopedContext.class).done(), NormalUIScoped.class));
+                .configure(NormalUIScoped.class).contextClass(NormalUIContextWrapper.class).done(), NormalUIScoped.class));
     }
 
     @BuildStep
@@ -103,10 +111,11 @@ public class VaadinProcessor {
         LOGGER.info("Register RouteScopedContext");
 
         contextRegistry.produce(new ContextRegistrarBuildItem((ContextRegistrar) registrationContext -> registrationContext
-                .configure(RouteScoped.class).normal().contextClass(RouteScopedContext.class).done(), RouteScoped.class));
+                .configure(RouteScoped.class).contextClass(RouteScopedContext.class).done(), RouteScoped.class));
         contextRegistry.produce(new ContextRegistrarBuildItem((ContextRegistrar) registrationContext -> registrationContext
-                .configure(NormalRouteScoped.class).normal().contextClass(RouteScopedContext.class).done(), NormalRouteScoped.class));
+                .configure(NormalRouteScoped.class).contextClass(NormalRouteContextWrapper.class).done(), NormalRouteScoped.class));
     }
+
 
     @BuildStep
     void mapVaadinServletPaths(final BuildProducer<ServletBuildItem> servletProducer) {
@@ -120,13 +129,14 @@ public class VaadinProcessor {
     @BuildStep
     @Record(STATIC_INIT)
     void scanForRoutes(final BeanArchiveIndexBuildItem beanArchiveIndex, final BeanContainerBuildItem beanContainer,
-            final BuildProducer<ReflectiveClassBuildItem> routeAnnotatedClassesProducer, final QuarkusVaadinRecorder template) {
+            final BuildProducer<ReflectiveClassBuildItem> routeAnnotatedClassesProducer, final QuarkusVaadinRecorder recorder) {
 
         LOGGER.info("Scan for @Routes");
 
         scanForReflectiveBeans(beanArchiveIndex, routeAnnotatedClassesProducer, ROUTE_ANNOTATION, this::buildReflectiveClassBuildItem,
-                target -> template.registerRoute(beanContainer.getValue(), target.toString()));
+                target -> recorder.registerRoute(beanContainer.getValue(), target.toString()));
     }
+
 
     @BuildStep
     void registerForVaadinFlowReflection(final BuildProducer<ReflectiveClassBuildItem> reflectiveClass) {

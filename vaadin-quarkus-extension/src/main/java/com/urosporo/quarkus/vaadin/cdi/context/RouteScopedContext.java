@@ -31,6 +31,9 @@ import com.urosporo.quarkus.vaadin.cdi.ContextualStorage;
 import com.urosporo.quarkus.vaadin.cdi.annotation.NormalUIScoped;
 import com.urosporo.quarkus.vaadin.cdi.annotation.RouteScopeOwner;
 import com.urosporo.quarkus.vaadin.cdi.annotation.RouteScoped;
+import com.urosporo.quarkus.vaadin.cdi.annotation.UIScoped;
+
+import io.quarkus.arc.Arc;
 
 /**
  * Context for {@link RouteScoped @RouteScoped} beans.
@@ -46,7 +49,6 @@ public class RouteScopedContext extends AbstractContext {
             // getting the session attribute.
             super(false);
         }
-
     }
 
     private ContextualStorageManager contextManager;
@@ -68,6 +70,12 @@ public class RouteScopedContext extends AbstractContext {
 
     @Override
     public boolean isActive() {
+
+        if (this.beanManager == null) {
+            this.contextManager = BeanProvider.getContextualReference(this.beanManager, ContextualStorageManager.class, false);
+            this.beanManager = Arc.container().beanManager();
+            this.isUIContextActive = () -> Arc.container().getActiveContext(UIScoped.class).isActive();
+        }
 
         return this.isUIContextActive.get();
     }
