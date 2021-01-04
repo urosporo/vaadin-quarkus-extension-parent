@@ -3,8 +3,6 @@ package com.urosporo.quarkus.vaadin;
 import static io.quarkus.deployment.annotations.ExecutionTime.STATIC_INIT;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -14,7 +12,6 @@ import org.jboss.jandex.DotName;
 import org.jboss.jandex.IndexView;
 import org.jboss.logging.Logger;
 
-import com.urosporo.quarkus.vaadin.DeploymentValidator.BeanInfo;
 import com.urosporo.quarkus.vaadin.cdi.QuarkusVaadinServlet;
 import com.urosporo.quarkus.vaadin.cdi.annotation.NormalRouteScoped;
 import com.urosporo.quarkus.vaadin.cdi.annotation.NormalUIScoped;
@@ -116,7 +113,6 @@ public class VaadinProcessor {
                 .configure(NormalRouteScoped.class).contextClass(NormalRouteContextWrapper.class).done(), NormalRouteScoped.class));
     }
 
-
     @BuildStep
     void mapVaadinServletPaths(final BuildProducer<ServletBuildItem> servletProducer) {
 
@@ -136,7 +132,6 @@ public class VaadinProcessor {
         scanForReflectiveBeans(beanArchiveIndex, routeAnnotatedClassesProducer, ROUTE_ANNOTATION, this::buildReflectiveClassBuildItem,
                 target -> recorder.registerRoute(beanContainer.getValue(), target.toString()));
     }
-
 
     @BuildStep
     void registerForVaadinFlowReflection(final BuildProducer<ReflectiveClassBuildItem> reflectiveClass) {
