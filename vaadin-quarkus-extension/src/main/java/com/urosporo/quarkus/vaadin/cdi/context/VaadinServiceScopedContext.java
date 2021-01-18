@@ -30,6 +30,7 @@ import com.urosporo.quarkus.vaadin.cdi.annotation.VaadinServiceScoped;
 import com.vaadin.flow.server.VaadinServlet;
 
 import io.quarkus.arc.Arc;
+import io.quarkus.arc.Unremovable;
 
 /**
  * Context for {@link VaadinServiceScoped @VaadinServiceScoped} beans.
@@ -69,6 +70,7 @@ public class VaadinServiceScopedContext extends AbstractContext {
     }
 
     @ApplicationScoped
+    @Unremovable
     public static class ContextualStorageManager extends AbstractContextualStorageManager<String> {
 
         public ContextualStorageManager() {
