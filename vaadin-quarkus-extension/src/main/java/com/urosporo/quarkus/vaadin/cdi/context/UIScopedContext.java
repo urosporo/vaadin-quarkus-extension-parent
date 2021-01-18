@@ -42,11 +42,11 @@ public class UIScopedContext extends AbstractContext {
 
     @Override
     protected ContextualStorage getContextualStorage(final Contextual<?> contextual, final boolean createIfNotExist) {
-
+        init();
         return this.contextualStorageManager.getContextualStorage(createIfNotExist);
     }
 
-    private void init() {
+    private synchronized void init() {
         if (contextualStorageManager == null) {
             BeanManager beanManager = Arc.container().beanManager();
             this.contextualStorageManager = BeanProvider.getContextualReference(beanManager, ContextualStorageManager.class, false);
@@ -60,7 +60,6 @@ public class UIScopedContext extends AbstractContext {
 
     @Override
     public boolean isActive() {
-        init();
         return VaadinSession.getCurrent() != null && UI.getCurrent() != null;
     }
 

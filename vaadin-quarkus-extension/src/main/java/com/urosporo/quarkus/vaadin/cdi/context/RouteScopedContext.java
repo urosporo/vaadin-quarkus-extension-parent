@@ -53,11 +53,14 @@ public class RouteScopedContext extends AbstractContext {
         }
     }
 
+    // guarded-by: this
     private ContextualStorageManager contextManager;
+    // guarded-by: this
     private Supplier<Boolean> isUIContextActive;
+    // guarded-by: this
     private BeanManager beanManager;
 
-    private void init() {
+    private synchronized void init() {
         if (this.beanManager == null) {
             this.beanManager = Arc.container().beanManager();
             this.contextManager = BeanProvider.getContextualReference(this.beanManager, ContextualStorageManager.class, false);
@@ -67,7 +70,6 @@ public class RouteScopedContext extends AbstractContext {
 
     @Override
     public Class<? extends Annotation> getScope() {
-
         return RouteScoped.class;
     }
 
