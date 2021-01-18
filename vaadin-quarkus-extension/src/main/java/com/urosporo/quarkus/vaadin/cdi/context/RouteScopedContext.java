@@ -34,6 +34,7 @@ import com.urosporo.quarkus.vaadin.cdi.annotation.RouteScoped;
 import com.urosporo.quarkus.vaadin.cdi.annotation.UIScoped;
 
 import io.quarkus.arc.Arc;
+import io.quarkus.arc.Unremovable;
 
 /**
  * Context for {@link RouteScoped @RouteScoped} beans.
@@ -41,6 +42,7 @@ import io.quarkus.arc.Arc;
 public class RouteScopedContext extends AbstractContext {
 
     @NormalUIScoped
+    @Unremovable
     public static class ContextualStorageManager extends AbstractContextualStorageManager<Class> {
 
         public ContextualStorageManager() {
@@ -55,11 +57,12 @@ public class RouteScopedContext extends AbstractContext {
     private Supplier<Boolean> isUIContextActive;
     private BeanManager beanManager;
 
-    public void init(final BeanManager beanManager, final Supplier<Boolean> isUIContextActive) {
-
-        this.contextManager = BeanProvider.getContextualReference(beanManager, ContextualStorageManager.class, false);
-        this.beanManager = beanManager;
-        this.isUIContextActive = isUIContextActive;
+    private void init() {
+        if (this.beanManager == null) {
+            this.beanManager = Arc.container().beanManager();
+            this.contextManager = BeanProvider.getContextualReference(this.beanManager, ContextualStorageManager.class, false);
+            this.isUIContextActive = () -> Arc.container().getActiveContext(UIScoped.class).isActive();
+        }
     }
 
     @Override
@@ -70,19 +73,13 @@ public class RouteScopedContext extends AbstractContext {
 
     @Override
     public boolean isActive() {
-
-        if (this.beanManager == null) {
-            this.contextManager = BeanProvider.getContextualReference(this.beanManager, ContextualStorageManager.class, false);
-            this.beanManager = Arc.container().beanManager();
-            this.isUIContextActive = () -> Arc.container().getActiveContext(UIScoped.class).isActive();
-        }
-
+        init();
         return this.isUIContextActive.get();
     }
 
     @Override
     protected ContextualStorage getContextualStorage(final Contextual<?> contextual, final boolean createIfNotExist) {
-
+        init();
         final Class key = convertToKey(contextual);
         return this.contextManager.getContextualStorage(key, createIfNotExist);
     }
@@ -104,13 +101,13 @@ public class RouteScopedContext extends AbstractContext {
 
     @Override
     public void destroy() {
-
+        init();
         destroyAllActive();
     }
 
     @Override
     public ContextState getState() {
-
+        init();
         return Collections::emptyMap; // FIXME
     }
 }
