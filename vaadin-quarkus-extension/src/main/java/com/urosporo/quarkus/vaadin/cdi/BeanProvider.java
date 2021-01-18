@@ -3,6 +3,7 @@ package com.urosporo.quarkus.vaadin.cdi;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
@@ -96,6 +97,8 @@ public final class BeanProvider {
      */
     public static <T> T getContextualReference(final BeanManager beanManager, final Class<T> type, final boolean optional,
             final Annotation... qualifiers) {
+        Objects.requireNonNull(beanManager, "beanManager");
+        Objects.requireNonNull(type, "type");
 
         final Set<Bean<?>> beans = beanManager.getBeans(type, qualifiers);
 
