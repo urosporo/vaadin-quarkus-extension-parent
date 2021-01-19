@@ -37,7 +37,7 @@ public class NormalRouteContextWrapper implements AlterableContext, InjectableCo
     // guarded-by: this
     private InjectableContext context;
 
-    private InjectableContext getContext() {
+    private synchronized InjectableContext getContext() {
         if (this.context == null) {
             this.context = Arc.container().getActiveContext(RouteScoped.class);
         }
