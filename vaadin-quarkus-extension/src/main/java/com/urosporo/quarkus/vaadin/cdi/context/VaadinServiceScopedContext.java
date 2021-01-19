@@ -30,6 +30,7 @@ import com.urosporo.quarkus.vaadin.cdi.annotation.VaadinServiceScoped;
 import com.vaadin.flow.server.VaadinServlet;
 
 import io.quarkus.arc.Arc;
+import io.quarkus.arc.Unremovable;
 
 /**
  * Context for {@link VaadinServiceScoped @VaadinServiceScoped} beans.
@@ -57,18 +58,17 @@ public class VaadinServiceScopedContext extends AbstractContext {
 
     @Override
     public Class<? extends Annotation> getScope() {
-
         return VaadinServiceScoped.class;
     }
 
     @Override
     public boolean isActive() {
-
         final VaadinServlet servlet = VaadinServlet.getCurrent();
         return servlet instanceof QuarkusVaadinServlet || (servlet == null && QuarkusVaadinServlet.getCurrentServletName() != null);
     }
 
     @ApplicationScoped
+    @Unremovable
     public static class ContextualStorageManager extends AbstractContextualStorageManager<String> {
 
         public ContextualStorageManager() {

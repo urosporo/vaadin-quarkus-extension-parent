@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
 
+import io.quarkus.arc.Unremovable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +24,7 @@ import com.vaadin.flow.server.VaadinServiceInitListener;
 @VaadinServiceScoped
 @VaadinServiceEnabled
 @SuppressWarnings("serial")
+@Unremovable
 public class QuarkusInstantiator implements Instantiator {
 
     private static final String CANNOT_USE_CDI_BEANS_FOR_I18N = "Cannot use CDI beans for I18N, falling back to the default behavior.";

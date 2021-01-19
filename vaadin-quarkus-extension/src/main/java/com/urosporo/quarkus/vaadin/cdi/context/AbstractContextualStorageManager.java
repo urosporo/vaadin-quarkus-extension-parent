@@ -18,7 +18,7 @@ import com.urosporo.quarkus.vaadin.cdi.ContextualStorage;
 public abstract class AbstractContextualStorageManager<K> implements Serializable {
 
     @Inject
-    private BeanManager beanManager;
+    BeanManager beanManager;
     private final boolean concurrent;
     private final Map<K, ContextualStorage> storageMap;
 

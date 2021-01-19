@@ -34,52 +34,48 @@ import io.quarkus.arc.InjectableContext;
  *
  */
 public class NormalRouteContextWrapper implements AlterableContext, InjectableContext {
-
+    // guarded-by: this
     private InjectableContext context;
+
+    private synchronized InjectableContext getContext() {
+        if (this.context == null) {
+            this.context = Arc.container().getActiveContext(RouteScoped.class);
+        }
+        return context;
+    }
 
     @Override
     public Class<? extends Annotation> getScope() {
-
         return NormalRouteScoped.class;
     }
 
     @Override
     public <T> T get(final Contextual<T> component, final CreationalContext<T> creationalContext) {
-
-        return this.context.get(component, creationalContext);
+        return getContext().get(component, creationalContext);
     }
 
     @Override
     public <T> T get(final Contextual<T> component) {
-
-        return this.context.get(component);
+        return getContext().get(component);
     }
 
     @Override
     public boolean isActive() {
-
-        if (this.context == null) {
-            this.context = Arc.container().getActiveContext(RouteScoped.class);
-        }
-
-        return this.context.isActive();
+        return getContext().isActive();
     }
 
     @Override
     public void destroy(final Contextual<?> contextual) {
-
-        this.context.destroy(contextual);
+        getContext().destroy(contextual);
     }
 
     @Override
     public void destroy() {
-
-        this.context.destroy();
+        getContext().destroy();
     }
 
     @Override
     public ContextState getState() {
-
-        return this.context.getState();
+        return getContext().getState();
     }
 }

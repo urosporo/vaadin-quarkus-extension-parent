@@ -31,6 +31,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
 
 import io.quarkus.arc.Arc;
+import io.quarkus.arc.Unremovable;
 
 /**
  * UIScopedContext is the context for {@link UIScoped @UIScoped} beans.
@@ -41,32 +42,29 @@ public class UIScopedContext extends AbstractContext {
 
     @Override
     protected ContextualStorage getContextualStorage(final Contextual<?> contextual, final boolean createIfNotExist) {
-
+        init();
         return this.contextualStorageManager.getContextualStorage(createIfNotExist);
     }
 
-    public void init(final BeanManager beanManager) {
-
-        this.contextualStorageManager = BeanProvider.getContextualReference(beanManager, ContextualStorageManager.class, false);
+    private synchronized void init() {
+        if (contextualStorageManager == null) {
+            BeanManager beanManager = Arc.container().beanManager();
+            this.contextualStorageManager = BeanProvider.getContextualReference(beanManager, ContextualStorageManager.class, false);
+        }
     }
 
     @Override
     public Class<? extends Annotation> getScope() {
-
         return UIScoped.class;
     }
 
     @Override
     public boolean isActive() {
-
-        if (this.contextualStorageManager == null) {
-            this.contextualStorageManager = BeanProvider.getContextualReference(Arc.container().beanManager(), ContextualStorageManager.class, false);
-        }
-
-        return VaadinSession.getCurrent() != null && UI.getCurrent() != null && this.contextualStorageManager != null;
+        return VaadinSession.getCurrent() != null && UI.getCurrent() != null;
     }
 
     @VaadinSessionScoped
+    @Unremovable
     public static class ContextualStorageManager extends AbstractContextualStorageManager<Integer> {
 
         public ContextualStorageManager() {
@@ -98,13 +96,13 @@ public class UIScopedContext extends AbstractContext {
 
     @Override
     public void destroy() {
-
+        init();
         destroyAllActive();
     }
 
     @Override
     public ContextState getState() {
-
+        init();
         return Collections::emptyMap; // FIXME
     }
 }
