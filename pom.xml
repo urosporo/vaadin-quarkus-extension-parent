@@ -19,10 +19,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <quarkus.version>1.8.2.Final</quarkus.version>
-
-    <vaadin.version>14.4.0</vaadin.version>
-    
-    <weld.version>2.4.6.Final</weld.version>
+    <vaadin.version>14.4.6</vaadin.version>
   </properties>
 
   <dependencyManagement>
