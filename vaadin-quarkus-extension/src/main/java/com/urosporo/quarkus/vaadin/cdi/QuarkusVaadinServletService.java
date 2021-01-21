@@ -105,7 +105,7 @@ public class QuarkusVaadinServletService extends VaadinServletService {
     }
 
     /**
-     * This class implements the actual instantiation and event brokering functionality of {@link CdiVaadinServletService}.
+     * This class implements the actual instantiation and event brokering functionality of {@link QuarkusVaadinServletService}.
      */
     public static class QuarkusVaadinServiceDelegate implements Serializable {
 
