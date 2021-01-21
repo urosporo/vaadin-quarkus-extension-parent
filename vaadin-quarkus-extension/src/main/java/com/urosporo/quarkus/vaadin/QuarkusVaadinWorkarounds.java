@@ -16,7 +16,7 @@ import java.util.Objects;
 
 /**
  * Workaround for https://github.com/mvysny/vaadin-quarkus/issues/2
- * @author Martin Vysny <mavi@vaadin.com>
+ * @author Martin Vysny (mavi@vaadin.com)
  */
 public class QuarkusVaadinWorkarounds implements ServletExtension {
     @Override
