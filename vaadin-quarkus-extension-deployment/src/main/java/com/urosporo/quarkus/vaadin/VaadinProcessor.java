@@ -119,7 +119,7 @@ public class VaadinProcessor {
         LOGGER.info("Add QuarkusVaadinServlet");
 
         servletProducer.produce(ServletBuildItem.builder(QuarkusVaadinServlet.class.getName(), QuarkusVaadinServlet.class.getName())
-                .addMapping("/*").build());
+                .addMapping("/*").setAsyncSupported(true).build());
     }
 
     @BuildStep
