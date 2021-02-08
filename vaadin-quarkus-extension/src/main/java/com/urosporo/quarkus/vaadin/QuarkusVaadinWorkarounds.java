@@ -3,6 +3,7 @@ package com.urosporo.quarkus.vaadin;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import io.undertow.servlet.ServletExtension;
 import io.undertow.servlet.api.DeploymentInfo;
+import org.atmosphere.cpr.ApplicationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ import java.util.Objects;
 public class QuarkusVaadinWorkarounds implements ServletExtension {
     @Override
     public void handleDeployment(DeploymentInfo deploymentInfo, ServletContext servletContext) {
-        // workaround for https://github.com/mvysny/vaadin-quarkus/issues/2 .
+        // workaround #1 for https://github.com/mvysny/vaadin-quarkus/issues/2 .
         //
         // In development mode, Vaadin will fail to load the token file
         // (because the token file resides in a separate classloader) and will fail with an exception.
@@ -41,6 +42,11 @@ public class QuarkusVaadinWorkarounds implements ServletExtension {
         } else {
             log.info("Token file loaded from jar file; probably Vaadin running in production mode, not patching Vaadin");
         }
+
+        // workaround #2 for https://github.com/mvysny/vaadin-quarkus/issues/17
+        // we need to use a patched JSR356AsyncSupport
+        servletContext.setInitParameter(ApplicationConfig.PROPERTY_COMET_SUPPORT, JSR356AsyncSupportPatch.class.getName());
+        servletContext.setInitParameter(ApplicationConfig.USE_SERVLET_CONTEXT_PARAMETERS, "true");
     }
 
     /**
