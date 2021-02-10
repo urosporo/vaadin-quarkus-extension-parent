@@ -16,6 +16,8 @@ public abstract class AbstractContext implements InjectableContext {
     /**
      * An implementation has to return the underlying storage which contains the items held in the Context.
      *
+     * @param contextual
+     *            dummy 4 deploy (TODO fix it)
      * @param createIfNotExist
      *            whether a ContextualStorage shall get created if it doesn't yet exist.
      * @return the underlying storage
@@ -79,7 +81,6 @@ public abstract class AbstractContext implements InjectableContext {
      *
      * @param bean
      *            dictates which bean shall get cleaned up
-     * @return <code>true</code> if the bean was destroyed, <code>false</code> if there was no such bean.
      */
     @Override
     public void destroy(final Contextual bean) {
@@ -118,6 +119,11 @@ public abstract class AbstractContext implements InjectableContext {
     /**
      * Destroys all the Contextual Instances in the specified ContextualStorage. This is a static method to allow various holder objects to cleanup
      * properly in &#064;PreDestroy.
+     *
+     * @param storage
+     *            dummy 4 deploy (TODO fix it)
+     * 
+     * @return dummy 4 deploy (TODO fix it)
      */
     public static Map<Object, ContextualInstanceInfo<?>> destroyAllActive(final ContextualStorage storage) {
 

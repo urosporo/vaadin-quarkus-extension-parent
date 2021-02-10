@@ -4,9 +4,44 @@
 
   <groupId>com.urosporo</groupId>
   <artifactId>vaadin-quarkus-extension-parent</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0-rc2</version>
 
   <packaging>pom</packaging>
+
+  <url>https://github.com/urosporo/vaadin-quarkus-extension-parent</url>
+
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Michael Brem</name>
+      <email>m_brem@hispeed.ch</email>
+      <organization>com.urosporo</organization>
+      <organizationUrl>https://github.com/urosporo/vaadin-quarkus-extension-parent</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/urosporo/vaadin-quarkus-extension-parent.git</connection>
+    <developerConnection>scm:git:ssh://github.com/urosporo/vaadin-quarkus-extension-parent.git</developerConnection>
+    <url>https://github.com/urosporo/vaadin-quarkus-extension-parent</url>
+  </scm>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 
   <properties>
     <compiler.plugin.version>3.8.1</compiler.plugin.version>
@@ -45,6 +80,7 @@
     <module>vaadin-quarkus-extension</module>
     <module>vaadin-quarkus-extension-deployment</module>
   </modules>
+
   <build>
     <plugins>
       <plugin>
@@ -76,4 +112,39 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>deploy-central</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.7</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.5</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
