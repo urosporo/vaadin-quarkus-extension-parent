@@ -23,8 +23,6 @@ public class ContextualStorage implements Serializable {
      *            is needed for serialisation
      * @param concurrent
      *            whether the ContextualStorage might get accessed concurrently by different threads
-     * @param passivationCapable
-     *            whether the storage is for passivation capable Scopes
      */
     public ContextualStorage(final BeanManager beanManager, final boolean concurrent) {
 
@@ -53,11 +51,14 @@ public class ContextualStorage implements Serializable {
     }
 
     /**
-     *
-     * @param bean
-     * @param creationalContext
      * @param <T>
-     * @return
+     *            dummy 4 deploy (TODO fix it)
+     * @param bean
+     *            dummy 4 deploy (TODO fix it)
+     * @param creationalContext
+     *            dummy 4 deploy (TODO fix it)
+     *
+     * @return dummy 4 deploy (TODO fix it)
      */
     public <T> T createContextualInstance(final Contextual<T> bean, final CreationalContext<T> creationalContext) {
 
@@ -99,6 +100,11 @@ public class ContextualStorage implements Serializable {
     /**
      * If the context is a passivating scope then we return the passivationId of the Bean. Otherwise we use the Bean directly.
      *
+     * @param <T>
+     *            dummy 4 deploy (TODO fix it)
+     * @param bean
+     *            dummy 4 deploy (TODO fix it)
+     *
      * @return the key to use in the context map
      */
     public <T> Object getBeanKey(final Contextual<T> bean) {
@@ -109,7 +115,12 @@ public class ContextualStorage implements Serializable {
     /**
      * Restores the Bean from its beanKey.
      *
+     * @param beanKey
+     *            dummy 4 deploy (TODO fix it)
+     *
      * @see #getBeanKey(javax.enterprise.context.spi.Contextual)
+     *
+     * @return the bean with the asked for beanKey
      */
     public Contextual<?> getBean(final Object beanKey) {
 
