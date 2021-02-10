@@ -7,6 +7,10 @@
   <version>1.0.0-rc2</version>
 
   <packaging>pom</packaging>
+  
+  <name>vaadin-quarkus-extension</name>
+  
+  <description>That's an extenstion to use the Vaadin framework with the Quarkus runtime</description>
 
   <url>https://github.com/urosporo/vaadin-quarkus-extension-parent</url>
 
