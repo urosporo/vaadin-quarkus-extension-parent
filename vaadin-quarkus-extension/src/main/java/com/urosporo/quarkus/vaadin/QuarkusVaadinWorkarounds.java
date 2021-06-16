@@ -1,13 +1,5 @@
 package com.urosporo.quarkus.vaadin;
 
-import com.vaadin.flow.server.frontend.FrontendUtils;
-import io.undertow.servlet.ServletExtension;
-import io.undertow.servlet.api.DeploymentInfo;
-import org.atmosphere.cpr.ApplicationConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.ServletContext;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -15,13 +7,26 @@ import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Paths;
 import java.util.Objects;
 
+import javax.servlet.ServletContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.vaadin.flow.server.frontend.FrontendUtils;
+
+import io.undertow.servlet.ServletExtension;
+import io.undertow.servlet.api.DeploymentInfo;
+
 /**
  * Workaround for https://github.com/mvysny/vaadin-quarkus/issues/2
+ *
  * @author Martin Vysny (mavi@vaadin.com)
  */
 public class QuarkusVaadinWorkarounds implements ServletExtension {
+
     @Override
-    public void handleDeployment(DeploymentInfo deploymentInfo, ServletContext servletContext) {
+    public void handleDeployment(final DeploymentInfo deploymentInfo, final ServletContext servletContext) {
+
         // workaround #1 for https://github.com/mvysny/vaadin-quarkus/issues/2 .
         //
         // In development mode, Vaadin will fail to load the token file
@@ -43,28 +48,25 @@ public class QuarkusVaadinWorkarounds implements ServletExtension {
             log.info("Token file loaded from jar file; probably Vaadin running in production mode, not patching Vaadin");
         }
 
-        // workaround #2 for https://github.com/mvysny/vaadin-quarkus/issues/17
-        // we need to use a patched JSR356AsyncSupport
-        servletContext.setInitParameter(ApplicationConfig.PROPERTY_COMET_SUPPORT, JSR356AsyncSupportPatch.class.getName());
-        servletContext.setInitParameter(ApplicationConfig.USE_SERVLET_CONTEXT_PARAMETERS, "true");
     }
 
     /**
-     * Tries to resolve given classpath resource as a file on the filesystem.
-     * Fails if the resource is missing from classpath.
-     * @param resource the classpath resource, not null.
-     * @return a file pointing towards the resource or null if the resource is not a file on the filesystem, but
-     * e.g. packed in a jar file.
+     * Tries to resolve given classpath resource as a file on the filesystem. Fails if the resource is missing from classpath.
+     *
+     * @param resource
+     *            the classpath resource, not null.
+     * @return a file pointing towards the resource or null if the resource is not a file on the filesystem, but e.g. packed in a jar file.
      */
-    private static File getResourceAsFile(String resource) {
+    private static File getResourceAsFile(final String resource) {
+
         final URL url = Thread.currentThread().getContextClassLoader().getResource(resource);
         Objects.requireNonNull(url, resource + " not found on classpath. Please run 'mvn clean package' once, to generate Vaadin token file.");
         try {
             return Paths.get(url.toURI()).toFile();
-        } catch (FileSystemNotFoundException ex) {
+        } catch (final FileSystemNotFoundException ex) {
             // url is not a file:// URL
             return null;
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }

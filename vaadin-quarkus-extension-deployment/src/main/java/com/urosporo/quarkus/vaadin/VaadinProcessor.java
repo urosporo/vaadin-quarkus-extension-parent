@@ -31,9 +31,8 @@ import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.arc.deployment.BeanArchiveIndexBuildItem;
 import io.quarkus.arc.deployment.BeanContainerBuildItem;
 import io.quarkus.arc.deployment.BeanDefiningAnnotationBuildItem;
-import io.quarkus.arc.deployment.BeanDeploymentValidatorBuildItem;
-import io.quarkus.arc.deployment.ContextRegistrarBuildItem;
-import io.quarkus.arc.processor.ContextRegistrar;
+import io.quarkus.arc.deployment.ContextRegistrationPhaseBuildItem;
+import io.quarkus.arc.deployment.ContextRegistrationPhaseBuildItem.ContextConfiguratorBuildItem;
 import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.annotations.Record;
@@ -68,49 +67,55 @@ public class VaadinProcessor {
     }
 
     @BuildStep
-    @SuppressWarnings("unchecked")
-    public void registerVaadinServiceScopedContext(final BuildProducer<ContextRegistrarBuildItem> contextRegistry) {
+    public ContextConfiguratorBuildItem registerVaadinServiceScopedContext(final ContextRegistrationPhaseBuildItem phase) {
 
         LOGGER.info("Register VaadinServiceScopedContext");
 
-        contextRegistry.produce(new ContextRegistrarBuildItem((ContextRegistrar) registrationContext -> registrationContext
-                .configure(VaadinServiceScoped.class).normal().contextClass(VaadinServiceScopedContext.class).done(), VaadinServiceScoped.class));
+        return new ContextConfiguratorBuildItem(
+                phase.getContext().configure(VaadinServiceScoped.class).normal().contextClass(VaadinServiceScopedContext.class));
     }
 
     @BuildStep
-    @SuppressWarnings("unchecked")
-    public void registerVaadinSessionScopedContext(final BuildProducer<ContextRegistrarBuildItem> contextRegistry) {
+    public ContextConfiguratorBuildItem registerVaadinSessionScopedContext(final ContextRegistrationPhaseBuildItem phase) {
 
         LOGGER.info("Register VaadinSessionScopedContext");
 
-        contextRegistry.produce(new ContextRegistrarBuildItem((ContextRegistrar) registrationContext -> registrationContext
-                .configure(VaadinSessionScoped.class).normal().contextClass(VaadinSessionScopedContext.class).done(), VaadinSessionScoped.class));
+        return new ContextConfiguratorBuildItem(
+                phase.getContext().configure(VaadinSessionScoped.class).normal().contextClass(VaadinSessionScopedContext.class));
     }
 
     @BuildStep
-    @SuppressWarnings("unchecked")
-    public void registerUIScopedContext(final BuildProducer<ContextRegistrarBuildItem> contextRegistry,
-            final BuildProducer<BeanDeploymentValidatorBuildItem> buildValidationProducer) {
+    public ContextConfiguratorBuildItem registerUIScopedContext(final ContextRegistrationPhaseBuildItem phase) {
 
         LOGGER.info("Register UIScopedContext");
 
-        contextRegistry.produce(new ContextRegistrarBuildItem(
-                (ContextRegistrar) registrationContext -> registrationContext.configure(UIScoped.class).contextClass(UIScopedContext.class).done(),
-                UIScoped.class));
-        contextRegistry.produce(new ContextRegistrarBuildItem((ContextRegistrar) registrationContext -> registrationContext
-                .configure(NormalUIScoped.class).contextClass(NormalUIContextWrapper.class).done(), NormalUIScoped.class));
+        return new ContextConfiguratorBuildItem(phase.getContext().configure(UIScoped.class).normal().contextClass(UIScopedContext.class));
     }
 
     @BuildStep
-    @SuppressWarnings("unchecked")
-    public void registerRouteScopedContext(final BuildProducer<ContextRegistrarBuildItem> contextRegistry) {
+    public ContextConfiguratorBuildItem registerNormalUIScopedContext(final ContextRegistrationPhaseBuildItem phase) {
+
+        LOGGER.info("Register NormalUIScopedContext");
+
+        return new ContextConfiguratorBuildItem(
+                phase.getContext().configure(NormalUIScoped.class).normal().contextClass(NormalUIContextWrapper.class));
+    }
+
+    @BuildStep
+    public ContextConfiguratorBuildItem registerRouteScopedContext(final ContextRegistrationPhaseBuildItem phase) {
 
         LOGGER.info("Register RouteScopedContext");
 
-        contextRegistry.produce(new ContextRegistrarBuildItem((ContextRegistrar) registrationContext -> registrationContext
-                .configure(RouteScoped.class).contextClass(RouteScopedContext.class).done(), RouteScoped.class));
-        contextRegistry.produce(new ContextRegistrarBuildItem((ContextRegistrar) registrationContext -> registrationContext
-                .configure(NormalRouteScoped.class).contextClass(NormalRouteContextWrapper.class).done(), NormalRouteScoped.class));
+        return new ContextConfiguratorBuildItem(phase.getContext().configure(RouteScoped.class).normal().contextClass(RouteScopedContext.class));
+    }
+
+    @BuildStep
+    public ContextConfiguratorBuildItem registerNormalRouteScopedContext(final ContextRegistrationPhaseBuildItem phase) {
+
+        LOGGER.info("Register NormalRouteScopedContext");
+
+        return new ContextConfiguratorBuildItem(
+                phase.getContext().configure(NormalRouteScoped.class).normal().contextClass(NormalRouteContextWrapper.class));
     }
 
     @BuildStep
@@ -118,8 +123,8 @@ public class VaadinProcessor {
 
         LOGGER.info("Add QuarkusVaadinServlet");
 
-        servletProducer.produce(ServletBuildItem.builder(QuarkusVaadinServlet.class.getName(), QuarkusVaadinServlet.class.getName())
-                .addMapping("/*").setAsyncSupported(true).build());
+        servletProducer.produce(ServletBuildItem.builder(QuarkusVaadinServlet.class.getName(), QuarkusVaadinServlet.class.getName()).addMapping("/*")
+                .setAsyncSupported(true).build());
     }
 
     @BuildStep
