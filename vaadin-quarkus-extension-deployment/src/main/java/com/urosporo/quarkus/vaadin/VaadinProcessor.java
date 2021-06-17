@@ -106,7 +106,7 @@ public class VaadinProcessor {
 
         LOGGER.info("Register RouteScopedContext");
 
-        return new ContextConfiguratorBuildItem(phase.getContext().configure(RouteScoped.class)..contextClass(RouteScopedContext.class));
+        return new ContextConfiguratorBuildItem(phase.getContext().configure(RouteScoped.class).contextClass(RouteScopedContext.class));
     }
 
     @BuildStep
