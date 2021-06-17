@@ -16,18 +16,23 @@
 
 package com.urosporo.quarkus.vaadin.cdi.context;
 
+import static javax.enterprise.event.Reception.IF_EXISTS;
+
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.event.Observes;
 
 import com.urosporo.quarkus.vaadin.cdi.AbstractContext;
 import com.urosporo.quarkus.vaadin.cdi.BeanProvider;
 import com.urosporo.quarkus.vaadin.cdi.ContextualStorage;
 import com.urosporo.quarkus.vaadin.cdi.QuarkusVaadinServlet;
 import com.urosporo.quarkus.vaadin.cdi.annotation.VaadinServiceScoped;
+import com.vaadin.flow.server.ServiceDestroyEvent;
 import com.vaadin.flow.server.VaadinServlet;
+import com.vaadin.flow.server.VaadinServletService;
 
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.Unremovable;
@@ -58,11 +63,13 @@ public class VaadinServiceScopedContext extends AbstractContext {
 
     @Override
     public Class<? extends Annotation> getScope() {
+
         return VaadinServiceScoped.class;
     }
 
     @Override
     public boolean isActive() {
+
         final VaadinServlet servlet = VaadinServlet.getCurrent();
         return servlet instanceof QuarkusVaadinServlet || (servlet == null && QuarkusVaadinServlet.getCurrentServletName() != null);
     }
@@ -76,6 +83,24 @@ public class VaadinServiceScopedContext extends AbstractContext {
             super(true);
         }
 
+        /**
+         * Service destroy event observer.
+         *
+         * During application shutdown it is container specific whether this observer being called, or not. Application context destroy may happen
+         * earlier, and cleanup done by {@link #destroyAll()}.
+         *
+         * @param event
+         *            service destroy event
+         */
+        private void onServiceDestroy(@Observes(notifyObserver = IF_EXISTS) final ServiceDestroyEvent event) {
+
+            if (!(event.getSource() instanceof VaadinServletService)) {
+                return;
+            }
+            final VaadinServletService service = (VaadinServletService) event.getSource();
+            final String servletName = service.getServlet().getServletName();
+            destroy(servletName);
+        }
     }
 
     @Override

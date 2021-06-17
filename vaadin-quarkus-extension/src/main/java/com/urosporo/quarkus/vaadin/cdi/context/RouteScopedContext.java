@@ -16,11 +16,16 @@
 
 package com.urosporo.quarkus.vaadin.cdi.context;
 
+import static javax.enterprise.event.Reception.IF_EXISTS;
+
 import java.lang.annotation.Annotation;
 import java.util.Collections;
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.PassivationCapable;
@@ -32,6 +37,7 @@ import com.urosporo.quarkus.vaadin.cdi.annotation.NormalUIScoped;
 import com.urosporo.quarkus.vaadin.cdi.annotation.RouteScopeOwner;
 import com.urosporo.quarkus.vaadin.cdi.annotation.RouteScoped;
 import com.urosporo.quarkus.vaadin.cdi.annotation.UIScoped;
+import com.vaadin.flow.router.AfterNavigationEvent;
 
 import io.quarkus.arc.Arc;
 import io.quarkus.arc.Unremovable;
@@ -50,6 +56,19 @@ public class RouteScopedContext extends AbstractContext {
             // Session lock checked in VaadinSessionScopedContext while
             // getting the session attribute.
             super(false);
+        }
+
+        private void onAfterNavigation(@Observes(notifyObserver = IF_EXISTS)
+                                               AfterNavigationEvent event) {
+            Set<Class> activeChain = event.getActiveChain().stream()
+                    .map(Object::getClass)
+                    .collect(Collectors.toSet());
+
+            Set<Class> missingFromChain = getKeySet().stream()
+                    .filter(routeCompClass -> !activeChain.contains(routeCompClass))
+                    .collect(Collectors.toSet());
+
+            missingFromChain.forEach(this::destroy);
         }
     }
 

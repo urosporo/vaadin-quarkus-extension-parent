@@ -4,9 +4,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.Unmanaged;
 import javax.inject.Inject;
 
-import io.quarkus.arc.Unremovable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +20,8 @@ import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServiceInitListener;
+
+import io.quarkus.arc.Unremovable;
 
 @VaadinServiceScoped
 @VaadinServiceEnabled
@@ -92,7 +94,10 @@ public class QuarkusInstantiator implements Instantiator {
     @Override
     public <T extends Component> T createComponent(final Class<T> componentClass) {
 
-        return this.delegate.createComponent(componentClass);
+        final Unmanaged<T> unmanagedClass = new Unmanaged<>(componentClass);
+        final Unmanaged.UnmanagedInstance<T> instance = unmanagedClass.newInstance();
+        instance.produce().inject().postConstruct();
+        return instance.get();
     }
 
     @Override
