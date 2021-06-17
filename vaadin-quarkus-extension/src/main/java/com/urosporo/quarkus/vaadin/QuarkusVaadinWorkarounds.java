@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import javax.servlet.ServletContext;
 
+import org.atmosphere.cpr.ApplicationConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +49,10 @@ public class QuarkusVaadinWorkarounds implements ServletExtension {
             log.info("Token file loaded from jar file; probably Vaadin running in production mode, not patching Vaadin");
         }
 
+        // workaround #2 for https://github.com/mvysny/vaadin-quarkus/issues/17
+        // we need to use a patched JSR356AsyncSupport
+        servletContext.setInitParameter(ApplicationConfig.PROPERTY_COMET_SUPPORT, JSR356AsyncSupportPatch.class.getName());
+        servletContext.setInitParameter(ApplicationConfig.USE_SERVLET_CONTEXT_PARAMETERS, "true");
     }
 
     /**
