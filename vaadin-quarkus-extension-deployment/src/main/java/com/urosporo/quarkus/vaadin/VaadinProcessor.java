@@ -89,7 +89,7 @@ public class VaadinProcessor {
 
         LOGGER.info("Register UIScopedContext");
 
-        return new ContextConfiguratorBuildItem(phase.getContext().configure(UIScoped.class).normal().contextClass(UIScopedContext.class));
+        return new ContextConfiguratorBuildItem(phase.getContext().configure(UIScoped.class).contextClass(UIScopedContext.class));
     }
 
     @BuildStep
@@ -106,7 +106,7 @@ public class VaadinProcessor {
 
         LOGGER.info("Register RouteScopedContext");
 
-        return new ContextConfiguratorBuildItem(phase.getContext().configure(RouteScoped.class).normal().contextClass(RouteScopedContext.class));
+        return new ContextConfiguratorBuildItem(phase.getContext().configure(RouteScoped.class)..contextClass(RouteScopedContext.class));
     }
 
     @BuildStep
