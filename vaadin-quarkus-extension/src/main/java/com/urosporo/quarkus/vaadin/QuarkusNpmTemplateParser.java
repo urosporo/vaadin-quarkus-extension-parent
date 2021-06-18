@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.polymertemplate.NpmTemplateParser;
 import com.vaadin.flow.component.polymertemplate.TemplateParser;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.frontend.FrontendUtils;
 
 public class QuarkusNpmTemplateParser extends NpmTemplateParser {
@@ -19,7 +20,7 @@ public class QuarkusNpmTemplateParser extends NpmTemplateParser {
     }
 
     @Override
-    protected String getSourcesFromTemplate(final String tag, final String url) {
+    protected String getSourcesFromTemplate(final VaadinService service, final String tag, final String url) {
 
         final InputStream content = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("/META-INF/resources/frontend/" + url.substring(2));
@@ -28,7 +29,7 @@ public class QuarkusNpmTemplateParser extends NpmTemplateParser {
             return FrontendUtils.streamToString(content);
         }
 
-        return super.getSourcesFromTemplate(tag, url);
+        return super.getSourcesFromTemplate(service, tag, url);
     }
 
     private Logger getLogger() {
